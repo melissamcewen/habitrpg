@@ -7,7 +7,8 @@ var nconf = require('nconf');
 var async = require('async');
 var shared = require('habitrpg-shared');
 var User = require('./../models/user').model;
-var ga = require('./../utils').ga;
+var utils = require('./../utils');
+var ga = utils.ga;
 var Group = require('./../models/group').model;
 var Challenge = require('./../models/challenge').model;
 var moment = require('moment');
@@ -391,6 +392,17 @@ api.cast = function(req, res, next) {
       ], done);
       break;
   }
+}
+
+/**
+ * POST /user/invite-friends
+ */
+api.inviteFriends = function(req, res, next) {
+  // TODO implement "users can only be invited once"
+  _.each(req.body, function(invite){
+    if (invite.email) utils.txnEmail(invite, 'invite-friend');
+  });
+  res.send(200);
 }
 
 /**

@@ -9,8 +9,10 @@ var i18n = require('../i18n');
 
 // -------- App --------
 router.get('/', i18n.getUserLanguage, middleware.locals, function(req, res) {
-  if (!req.headers['x-api-user'] && !req.headers['x-api-key'] && !(req.session && req.session.userId))
+  if (!req.headers['x-api-user'] && !req.headers['x-api-key'] && !(req.session && req.session.userId)) {
+    if (req.query.partyInvite) req.session.partyInvite = req.query;
     return res.redirect('/static/front')
+  }
 
   return res.render('index', {
     title: 'HabitRPG | Your Life, The Role Playing Game',

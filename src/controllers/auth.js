@@ -9,6 +9,7 @@ var request = require('request');
 var User = require('../models/user').model;
 var ga = require('./../utils').ga;
 var i18n = require('./../i18n');
+var Group = require('../models/group').model;
 
 var isProd = nconf.get('NODE_ENV') === 'production';
 
@@ -173,7 +174,15 @@ api.loginSocial = function(req, res, next) {
       };
       user.auth[network] = prof;
       user = new User(user);
+      if (req.session.partyInvite) {
+        user.invitations.party = {id:req.session.partyInvite.id, name:req.session.partyInvite.name};
+        // Reward the inviting user
+        User.update({_id:req.session.partyInvite.inviter},{$inc:{'quests.gryphon':1}}).exec();
+        Group.update({_id:req.session.partyInvite.id},{$push:{'invites':user._id}});
+        delete req.session.partyInvite;
+      }
       user.save(cb);
+
 
       if(isProd && prof.emails && prof.emails[0] && prof.emails[0].value){
         utils.txnEmail({name:prof.displayName || prof.username, email:prof.emails[0].value}, 'welcome');
